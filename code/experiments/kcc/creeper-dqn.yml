@@ -5,7 +5,7 @@ record_video: true
 device: null
 
 env:
-  name: 'HuskEnvironment'
+  name: 'CreeperEnvironment'
   params:
     hud: false
     verbose: false
@@ -35,7 +35,7 @@ wrappers:
 
 algorithm:
   name:
-    "SoundDRQNAlgorithm"
+    "SoundDQNAlgorithm"
   params:
     num_episodes: 1000
     warmup_episodes: 10
@@ -53,10 +53,9 @@ algorithm:
     epsilon_decay: 0.99
     epsilon_min: 0.01
     update_frequency: 1000
-    train_frequency: 400
+    train_frequency: 40
     replay_buffer_size: 1000000
-    batch_size: 32
-    time_step: 8
+    batch_size: 128
     gamma: 0.99
     learning_rate: 0.00001
     weight_decay: 0.00001

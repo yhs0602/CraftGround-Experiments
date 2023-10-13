@@ -1,4 +1,5 @@
 from .continuous_husks_environment import ContinuousHuskEnvironment
+from .creeper_environment import CreeperEnvironment
 from .find_animal_environment import FindAnimalEnvironment
 from .find_village_environment import FindVillageEnvironment
 from .fishing_environment import FishingEnvironment

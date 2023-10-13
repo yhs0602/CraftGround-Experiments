@@ -27,6 +27,7 @@ class AvoidDamageWrapper(CleanUpFastResetWrapper):
 
         reward = self.base_reward
         if is_dead:
+            print(f"{info_obs.last_death_message=}")
             self.health_deque.append(20)
             terminated = True
             reward = self.death_reward
