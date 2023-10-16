@@ -18,6 +18,7 @@ env:
     min_distance: 7
     max_distance: 16
     terrain: 1
+    can_destroy: true
 
 wrappers:
   - name: 'ActionWrapper'
