@@ -85,7 +85,7 @@ class WitherEnvironment(BaseEnvironment):
         if kill:
             difficulty_commands = ["difficulty hard"]
         else:
-            difficulty_commands = ["difficulty easy"]
+            difficulty_commands = ["difficulty normal"]
 
         explosion_commands = []
         if not can_destroy:
