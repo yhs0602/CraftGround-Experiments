@@ -16,6 +16,8 @@ env:
     render_distance: 2
     simulation_distance: 5
     num_creepers: 5
+    min_distance: 7
+    max_distance: 16
 
 wrappers:
   - name: 'ActionWrapper'

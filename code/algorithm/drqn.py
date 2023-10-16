@@ -106,6 +106,7 @@ class DRQNAlgorithm(abc.ABC):
                     {
                         "test/step": episode,
                         "test/score": test_score,
+                        "test/episode_length": num_steps,
                     }
                 )
             else:  # training
@@ -127,6 +128,7 @@ class DRQNAlgorithm(abc.ABC):
                         "avg_score": avg_score,
                         "avg_loss": avg_loss,
                         "epsilon": self.explorer.epsilon,
+                        "episode_length": num_steps,
                     }
                 )
             if num_steps == 0:
@@ -184,6 +186,7 @@ class DRQNAlgorithm(abc.ABC):
             )
             if self.explorer.should_explore() or self.episode < self.warmup_episodes:
                 action = np.random.choice(self.action_dim)  # explore
+                print(f"Random action: {action}")
 
             next_state, reward, done, truncated, info = self.env.step(action)
             episode_reward += reward
@@ -206,6 +209,7 @@ class DRQNAlgorithm(abc.ABC):
 
             if done:
                 break
+            state = next_state
 
         # add the episode to the replay buffer
         self.replay_buffer.add_episode(episode)
@@ -313,6 +317,40 @@ class DRQNAlgorithm(abc.ABC):
 
         self.optimizer.zero_grad()
         loss.backward()
+
+        all_parameters = list(self.policy_net.parameters())
+        bias_parameters = [p for p in all_parameters if len(p.data.shape) > 1]
+        gradient_parameters = [p for p in all_parameters if p.grad is not None]
+
+        def compute_avg_and_std(parameters):
+            total_mean = sum(p.data.mean() for p in parameters)
+            total_std = sum(p.data.std() for p in parameters)
+            count = len(parameters)
+
+            return total_mean / count, total_std / count
+
+        avg_weight, std_weight = compute_avg_and_std(all_parameters)
+        avg_bias, std_bias = compute_avg_and_std(bias_parameters)
+
+        # gradient 평균 및 std 계산
+        avg_gradient = sum(p.grad.mean() for p in gradient_parameters) / len(
+            gradient_parameters
+        )
+        std_gradient = sum(p.grad.std() for p in gradient_parameters) / len(
+            gradient_parameters
+        )
+
+        self.logger.log(
+            {
+                "weight_avg": avg_weight,
+                "bias_avg": avg_bias,
+                "gradient_avg": avg_gradient,
+                "weight_std": std_weight,
+                "bias_std": std_bias,
+                "gradient_std": std_gradient,
+            }
+        )
+
         self.optimizer.step()
         return loss.item()
 

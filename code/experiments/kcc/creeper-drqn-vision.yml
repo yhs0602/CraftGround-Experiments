@@ -16,6 +16,8 @@ env:
     render_distance: 2
     simulation_distance: 5
     num_creepers: 5
+    min_distance: 7
+    max_distance: 16
 
 wrappers:
   - name: 'ActionWrapper'
@@ -32,8 +34,8 @@ wrappers:
     x_dim: 114
     y_dim: 64
   - name: 'AvoidDamageWrapper'
-    damage_reward: -0.1
-    alive_reward: 0.5
+    damage_reward: -1
+    alive_reward: 0.1
 
 algorithm:
   name:
@@ -55,15 +57,15 @@ algorithm:
     stride: 2
     epsilon_init: 1.0
     epsilon_decay: 0.99
-    epsilon_min: 0.01
+    epsilon_min: 0.3
     update_frequency: 1000
     train_frequency: 400
     replay_buffer_size: 1000000
     batch_size: 32
-    time_step: 8
-    gamma: 0.99
+    time_step: 16
+    gamma: 0.95
     learning_rate: 0.00001
     weight_decay: 0.00001
-    tau: 1.0
+    tau: 0.8
 
 

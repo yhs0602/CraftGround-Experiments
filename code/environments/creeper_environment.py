@@ -21,6 +21,8 @@ class CreeperEnvironment(BaseEnvironment):
         render_distance: int = 2,
         simulation_distance: int = 5,
         num_creepers: int = 1,
+        min_distance: int = 7,
+        max_distance: int = 16,
         random_pos: bool = True,  # randomize creeper position
         darkness: bool = False,  # add darkness effect
         terrain: int = 0,  # 0: flat, 1: random, 2: random with water
@@ -53,8 +55,8 @@ class CreeperEnvironment(BaseEnvironment):
             noisy_sounds = []
         husks_commands = generate_creepers(
             num_creepers,
-            5,
-            10,
+            min_distance,
+            max_distance,
             randomize=random_pos,
         )
         killedStatKeys = []
