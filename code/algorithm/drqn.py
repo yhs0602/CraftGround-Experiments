@@ -186,7 +186,7 @@ class DRQNAlgorithm(abc.ABC):
             )
             if self.explorer.should_explore() or self.episode < self.warmup_episodes:
                 action = np.random.choice(self.action_dim)  # explore
-                print(f"Random action: {action}")
+                # print(f"Random action: {action}")
 
             next_state, reward, done, truncated, info = self.env.step(action)
             episode_reward += reward
