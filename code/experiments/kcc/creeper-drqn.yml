@@ -1,11 +1,11 @@
 seed: null
 env_path: null
-group: "kcc-creeper-dqn"
+group: "kcc-creepers-drqn"
 record_video: true
 device: null
 
 env:
-  name: 'HuskEnvironment'
+  name: 'CreeperEnvironment'
   params:
     hud: false
     verbose: false
@@ -15,6 +15,7 @@ env:
     size_y: 64
     render_distance: 2
     simulation_distance: 5
+    num_creepers: 5
 
 wrappers:
   - name: 'ActionWrapper'
@@ -30,8 +31,8 @@ wrappers:
   - name: 'SoundWrapper'
     coord_dim: 2
   - name: 'AvoidDamageWrapper'
-    damage_reward: -0.1
-    alive_reward: 0.5
+    damage_reward: -1
+    alive_reward: 0.1
 
 algorithm:
   name:
@@ -52,7 +53,7 @@ algorithm:
     epsilon_init: 1.0
     epsilon_decay: 0.99
     epsilon_min: 0.01
-    update_frequency: 1000
+    update_frequency: 200
     train_frequency: 400
     replay_buffer_size: 1000000
     batch_size: 32

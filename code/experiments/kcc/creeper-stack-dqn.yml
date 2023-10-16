@@ -1,11 +1,11 @@
 seed: null
 env_path: null
-group: "kcc-creeper-stack-dqn"
+group: "kcc-creepers-stack-dqn"
 record_video: true
 device: null
 
 env:
-  name: 'HuskEnvironment'
+  name: 'CreeperEnvironment'
   params:
     hud: false
     verbose: false
@@ -15,6 +15,7 @@ env:
     size_y: 64
     render_distance: 2
     simulation_distance: 5
+    num_creepers: 5
 
 wrappers:
   - name: 'ActionWrapper'
