@@ -1,13 +1,14 @@
 from typing import Tuple, Optional, List
 
+import math
 import numpy as np
 import torch
 from torch import optim
 
-from models.dueling_bimodal_drqn import DuelingBimodalDRQN
-from models.transition import BimodalTransition, BimodalEpisode
 from algorithm.drqn import DRQNAlgorithm
 from logger import Logger
+from models.dueling_bimodal_drqn import DuelingBimodalDRQN
+from models.transition import BimodalTransition, BimodalEpisode
 
 
 class BimodalDRQNAlgorithm(DRQNAlgorithm):
@@ -106,6 +107,13 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
                 cell_state=cell_state,
             )
         self.policy_net.train()  # TODO: check if this is correct
+        self.logger.log(self.policy_net.get_activation_ratio())
+        # self.logger.log(
+        #     {
+        #         "std_q_values": torch.std(current_qs).item(),
+        #         "mean_q_values": torch.mean(current_qs).item(),
+        #     }
+        # )
         action = current_qs.argmax().item()
         return action, (new_hidden_state, new_cell_state)
 
@@ -116,6 +124,10 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
         hidden_batch, cell_batch = self.policy_net.init_hidden_states(
             bsize=self.batch_size
         )
+        target_hidden_batch, target_cell_batch = self.target_net.init_hidden_states(
+            bsize=self.batch_size
+        )
+
         batch_episodes: List[BimodalEpisode] = self.replay_buffer.get_batch(
             self.batch_size, self.time_step
         )
@@ -183,8 +195,8 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
             torch_next_video_states_batch,
             self.batch_size,
             self.time_step,
-            hidden_batch,
-            cell_batch,
+            target_hidden_batch,
+            target_cell_batch,
         )
         Q_next_max = next_q_values.detach().max(dim=1)[0]
         expected_q_values = (
@@ -199,6 +211,39 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
 
         self.optimizer.zero_grad()
         loss.backward()
+
+        all_parameters = list(self.policy_net.parameters())
+        bias_parameters = [p for p in all_parameters if len(p.data.shape) > 1]
+        gradient_parameters = [p for p in all_parameters if p.grad is not None]
+
+        def compute_avg_and_std(parameters):
+            total_mean = sum(p.data.mean() for p in parameters)
+            total_std = math.sqrt(sum(p.data.std() ** 2 for p in parameters))
+            count = len(parameters)
+
+            return total_mean / count, total_std / count
+
+        avg_weight, std_weight = compute_avg_and_std(all_parameters)
+        avg_bias, std_bias = compute_avg_and_std(bias_parameters)
+
+        # gradient 평균 및 std 계산
+        avg_gradient = sum(p.grad.mean() for p in gradient_parameters) / len(
+            gradient_parameters
+        )
+        std_gradient = sum(p.grad.std() for p in gradient_parameters) / len(
+            gradient_parameters
+        )
+
+        self.logger.log(
+            {
+                "weight_avg": avg_weight,
+                "bias_avg": avg_bias,
+                "gradient_avg": avg_gradient,
+                "weight_std": std_weight,
+                "bias_std": std_bias,
+                "gradient_std": std_gradient,
+            }
+        )
         self.optimizer.step()
         return loss.item()
 

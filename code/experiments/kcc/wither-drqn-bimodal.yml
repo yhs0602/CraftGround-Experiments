@@ -1,6 +1,6 @@
 seed: null
 env_path: null
-group: "kcc-wither-drqn-vision"
+group: "kcc-wither-drqn-bimodal"
 record_video: true
 device: null
 
@@ -34,16 +34,17 @@ wrappers:
       - LOOK_UP
       - LOOK_DOWN
 
-  - name: 'VisionWrapper'
+  - name: 'BimodalWrapper'
     x_dim: 114
     y_dim: 64
+    sound_coord_dim: 2
   - name: 'AvoidDamageWrapper'
     damage_reward: -0.1
     alive_reward: 0.1
 
 algorithm:
   name:
-    "VisionDRQNAlgorithm"
+    "BimodalDRQNAlgorithm"
   params:
     num_episodes: 3000
     warmup_episodes: 10
@@ -62,14 +63,14 @@ algorithm:
     epsilon_init: 1.0
     epsilon_decay: 0.99
     epsilon_min: 0.3
-    update_frequency: 1000
-    train_frequency: 400
+    update_frequency: 400
+    train_frequency: 200
     replay_buffer_size: 1000000
     batch_size: 32
     time_step: 16
     gamma: 0.95
     learning_rate: 0.001
-    weight_decay: 0.5
+    weight_decay: 0
     tau: 0.8
 
 

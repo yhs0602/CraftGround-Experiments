@@ -4,6 +4,7 @@ from abc import abstractmethod
 from collections import deque
 from typing import Optional, Tuple, List
 
+import math
 import numpy as np
 import torch
 from torch import nn
@@ -11,8 +12,8 @@ from torch import nn
 import criterion
 from algorithm.epsilon_greedy import EpsilonGreedyExplorer
 from logger import Logger
-from models.transition import Transition, Episode
 from models.recurrent_replay_buffer import RecurrentReplayBuffer
+from models.transition import Transition, Episode
 
 
 class DRQNAlgorithm(abc.ABC):
@@ -83,6 +84,8 @@ class DRQNAlgorithm(abc.ABC):
         solved_criterion_config = solved_criterion
         criterion_cls = getattr(criterion, solved_criterion_config["name"])
         self.solved_criterion = criterion_cls(**solved_criterion_config["params"])
+
+        self.log_values_queue = []
 
     def run(self):
         self.logger.start_training()
@@ -155,6 +158,7 @@ class DRQNAlgorithm(abc.ABC):
             action, (hidden_state, cell_state) = self.get_next_hidden_state(
                 state, hidden_state, cell_state
             )
+            print(f"Test {action=}")
             next_state, reward, done, truncated, info = self.env.step(action)
             episode_reward += reward
             steps_in_episode += 1
@@ -240,6 +244,8 @@ class DRQNAlgorithm(abc.ABC):
                 cell_state=cell_state,
             )
         self.policy_net.train()  # TODO: check if this is correct
+        self.logger.log(self.policy_net.get_activation_ratio())
+        # self.logger.log({"std_q_values": torch.std(current_qs).item()})
         action = current_qs.argmax().item()
         return action, (new_hidden_state, new_cell_state)
 
@@ -324,7 +330,7 @@ class DRQNAlgorithm(abc.ABC):
 
         def compute_avg_and_std(parameters):
             total_mean = sum(p.data.mean() for p in parameters)
-            total_std = sum(p.data.std() for p in parameters)
+            total_std = math.sqrt(sum(p.data.std() ** 2 for p in parameters))
             count = len(parameters)
 
             return total_mean / count, total_std / count
