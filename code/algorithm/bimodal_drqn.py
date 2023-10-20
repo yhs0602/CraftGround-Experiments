@@ -234,7 +234,7 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
             gradient_parameters
         )
 
-        self.logger.log(
+        self.logger.delay_log(
             {
                 "weight_avg": avg_weight,
                 "bias_avg": avg_bias,

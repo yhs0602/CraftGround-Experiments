@@ -110,6 +110,7 @@ class DRQNAlgorithm(abc.ABC):
                         "test/step": episode,
                         "test/score": test_score,
                         "test/episode_length": num_steps,
+                        "test/avg_score": avg_test_score,
                     }
                 )
             else:  # training
@@ -244,7 +245,7 @@ class DRQNAlgorithm(abc.ABC):
                 cell_state=cell_state,
             )
         self.policy_net.train()  # TODO: check if this is correct
-        self.logger.log(self.policy_net.get_activation_ratio())
+        # self.logger.log(self.policy_net.get_activation_ratio())
         # self.logger.log({"std_q_values": torch.std(current_qs).item()})
         action = current_qs.argmax().item()
         return action, (new_hidden_state, new_cell_state)
@@ -346,7 +347,7 @@ class DRQNAlgorithm(abc.ABC):
             gradient_parameters
         )
 
-        self.logger.log(
+        self.logger.delay_log(
             {
                 "weight_avg": avg_weight,
                 "bias_avg": avg_bias,

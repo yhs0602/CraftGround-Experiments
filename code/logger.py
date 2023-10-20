@@ -23,9 +23,12 @@ class Logger:
         wandb.define_metric("test/*", step_metric="test/step")
         self.record_video = record_video
         self.video_recorder = None
+        self.to_log = {}
 
     def log(self, data: Dict):
         print(" ".join(["{0}={1}".format(k, v) for k, v in data.items()]))
+        data.update(self.to_log)
+        self.to_log = {}
         wandb.log(data)
 
     def start_training(self):
@@ -49,3 +52,6 @@ class Logger:
         checkpoint_path = f"checkpoint_{episode}.pth"
         agent.save(checkpoint_path)
         wandb.save(checkpoint_path)
+
+    def delay_log(self, param):
+        self.to_log = param

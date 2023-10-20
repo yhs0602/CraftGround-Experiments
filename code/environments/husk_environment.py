@@ -22,6 +22,8 @@ class HuskEnvironment(BaseEnvironment):
         simulation_distance: int = 5,
         num_husks: int = 1,
         random_pos: bool = True,  # randomize husk position
+        min_distance: int = 5,
+        max_distance: int = 10,
         darkness: bool = False,  # add darkness effect
         strong: bool = False,  # give husk strong shovel
         noisy: bool = False,  # add noisy mobs
@@ -53,12 +55,14 @@ class HuskEnvironment(BaseEnvironment):
             noisy_sounds = []
         husks_commands = generate_husks(
             num_husks,
-            5,
-            10,
+            min_distance,
+            max_distance,
             shovel=strong,
             is_baby=is_baby,
             randomize=random_pos,
         )
+        inventory_commands = []
+        hunt_sounds = []
         if can_hunt:
             inventory_commands = [
                 "item replace entity @p weapon.offhand with minecraft:shield",

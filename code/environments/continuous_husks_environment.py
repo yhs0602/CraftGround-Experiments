@@ -23,9 +23,23 @@ class ContinuousHuskEnvironment(BaseEnvironment):
         render_action: bool = True,
         render_distance: int = 2,
         simulation_distance: int = 5,
+        num_husks: int = 1,
+        random_pos: bool = True,  # randomize husk position
+        min_distance: int = 5,
+        max_distance: int = 10,
+        darkness: bool = False,  # add darkness effect
+        strong: bool = False,  # give husk strong shovel
+        noisy: bool = False,  # add noisy mobs
+        is_baby: bool = False,  # make husk baby
+        terrain: int = 0,  # 0: flat, 1: random, 2: random with water
+        can_hunt: bool = False,  # player can hunt husks
+        surrounding_entities_keys=None,
         *args,
         **kwargs,
     ):
+        if surrounding_entities_keys is None:
+            surrounding_entities_keys = [1, 2, 5]
+
         class RandomHuskWrapper(CleanUpFastResetWrapper):
             def __init__(self):
                 initialExtraCommands = []
@@ -52,6 +66,7 @@ class ContinuousHuskEnvironment(BaseEnvironment):
                     isHardCore=False,
                     isWorldFlat=True,  # superflat world
                     obs_keys=["sound_subtitles"],
+                    surrounding_entities_keys=surrounding_entities_keys,
                     initialExtraCommands=initialExtraCommands,
                     isHudHidden=not hud,
                     render_action=render_action,
@@ -68,9 +83,8 @@ class ContinuousHuskEnvironment(BaseEnvironment):
             ) -> tuple[WrapperObsType, dict[str, Any]]:
                 extra_commands = ["tp @e[type=!player] ~ -500 ~"]
                 extra_commands.extend(generate_husks(1, 4, 7))
-
+                options["extra_commands"] = extra_commands
                 obs = self.env.reset(
-                    extra_commands=extra_commands,
                     seed=seed,
                     options=options,
                 )
@@ -83,7 +97,13 @@ class ContinuousHuskEnvironment(BaseEnvironment):
             def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
                 obs, reward, terminated, truncated, info = self.env.step(action)
                 if random.randint(0, 50) == 0:
-                    extra_commands = generate_husks(1, 4, 7)
+                    extra_commands = generate_husks(
+                        num_husks,
+                        min_distance,
+                        max_distance,
+                        shovel=strong,
+                        randomize=random_pos,
+                    )
                     self.env.add_commands(extra_commands)
                 return obs, reward, terminated, truncated, info
 

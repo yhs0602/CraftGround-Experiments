@@ -1,6 +1,7 @@
 from .action import ActionWrapper
 from .attack_kill import AttackKillWrapper
 from .avoid_damage import AvoidDamageWrapper
+from .avoid_husk_wrapper import AvoidHuskWrapper
 from .bimodal import BimodalWrapper
 from .bimodal_token import BimodalTokenWrapper
 from .fish_anything import FishAnythingWrapper
