@@ -107,7 +107,7 @@ class BimodalDRQNAlgorithm(DRQNAlgorithm):
                 cell_state=cell_state,
             )
         self.policy_net.train()  # TODO: check if this is correct
-        self.logger.log(self.policy_net.get_activation_ratio())
+        self.logger.delay_log(self.policy_net.get_activation_ratio())
         # self.logger.log(
         #     {
         #         "std_q_values": torch.std(current_qs).item(),
