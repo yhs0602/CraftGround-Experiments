@@ -2,10 +2,10 @@ from enum import Enum
 from typing import SupportsFloat, Any, List, Optional
 
 import gymnasium as gym
+from craftground.craftground.minecraft import no_op
 from gymnasium.core import WrapperActType, WrapperObsType
 
 from wrappers.CleanUpFastResetWrapper import CleanUpFastResetWrapper
-from mydojo.minecraft import no_op
 
 
 # Converts the int action space to a box action space

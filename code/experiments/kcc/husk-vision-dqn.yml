@@ -8,7 +8,7 @@ env:
   name: 'ContinuousHuskEnvironment'
   params:
     hud: false
-    verbose: false
+    verbose: true
     port: 8000
     render_action: true
     size_x: 114
@@ -20,6 +20,7 @@ env:
     max_distance: 30
     num_husks: 20
     continuous: true
+    biocular: true
 
 wrappers:
   - name: 'ActionWrapper'

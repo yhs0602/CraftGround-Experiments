@@ -1,9 +1,9 @@
 import random
 from typing import Optional, Any, Tuple
 
+from craftground import craftground
 from gymnasium.core import WrapperObsType
 
-import mydojo
 from environments.base_environment import BaseEnvironment
 from wrappers.CleanUpFastResetWrapper import CleanUpFastResetWrapper
 
@@ -106,7 +106,7 @@ class HuskEnvironment(BaseEnvironment):
 
         class RandomHuskWrapper(CleanUpFastResetWrapper):
             def __init__(self):
-                self.env = mydojo.make(
+                self.env = craftground.make(
                     verbose=verbose,
                     env_path=env_path,
                     port=port,

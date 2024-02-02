@@ -3,7 +3,7 @@ from typing import Optional, Any, Tuple
 
 from gymnasium.core import WrapperObsType
 
-import mydojo
+from craftground import craftground
 from environments.base_environment import BaseEnvironment
 from wrappers.CleanUpFastResetWrapper import CleanUpFastResetWrapper
 
@@ -125,7 +125,7 @@ class WitherEnvironment(BaseEnvironment):
 
         class RandomCreeperWrapper(CleanUpFastResetWrapper):
             def __init__(self):
-                self.env = mydojo.make(
+                self.env = craftground.make(
                     verbose=verbose,
                     env_path=env_path,
                     port=port,
