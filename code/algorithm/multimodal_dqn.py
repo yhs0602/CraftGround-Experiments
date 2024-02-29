@@ -36,6 +36,8 @@ class MultimodalDQNAlgorithm(DQNAlgorithm):
         learning_rate,
         weight_decay,
         tau,
+        stack_frames: Optional[int] = 1,
+        **kwargs,
     ):
         super().__init__(
             env,
@@ -58,6 +60,7 @@ class MultimodalDQNAlgorithm(DQNAlgorithm):
             learning_rate,
             weight_decay,
             tau,
+            stack_frames,
         )
         self.kernel_size = kernel_size
         self.stride = stride

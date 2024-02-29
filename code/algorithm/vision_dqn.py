@@ -1,3 +1,5 @@
+from typing import Optional
+
 from torch import optim
 
 from models.dueling_vision_dqn import DuelingVisionDQN
@@ -30,6 +32,8 @@ class VisionDQNAlgorithm(DQNAlgorithm):
         learning_rate,
         weight_decay,
         tau,
+        stack_frames: Optional[int] = 1,
+        **kwargs,
     ):
         super().__init__(
             env,
@@ -52,6 +56,7 @@ class VisionDQNAlgorithm(DQNAlgorithm):
             learning_rate,
             weight_decay,
             tau,
+            stack_frames,
         )
         self.state_dim = env.observation_space.shape
         self.kernel_size = kernel_size

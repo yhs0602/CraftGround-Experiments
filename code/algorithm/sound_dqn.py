@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from torch import optim
 
@@ -29,6 +31,8 @@ class SoundDQNAlgorithm(DQNAlgorithm):
         learning_rate,
         weight_decay,
         tau,
+        stack_frames: Optional[int] = 1,
+        **kwargs,
     ):
         super().__init__(
             env,
@@ -51,6 +55,7 @@ class SoundDQNAlgorithm(DQNAlgorithm):
             learning_rate,
             weight_decay,
             tau,
+            stack_frames,
         )
         self.state_dim = (np.prod(env.observation_space.shape),)
         self.policy_net = DuelingSoundDQN(

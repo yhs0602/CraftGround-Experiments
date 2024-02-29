@@ -16,8 +16,8 @@ from logger import Logger
 
 
 class DQNAlgorithm(abc.ABC):
-    policy_net: torch.nn.Module
-    target_net: torch.nn.Module
+    policy_net: torch.nn.Module  # input: stacked frames
+    target_net: torch.nn.Module  # input: stacked frames
     optimizer: torch.optim.Optimizer
 
     @abstractmethod
@@ -43,6 +43,7 @@ class DQNAlgorithm(abc.ABC):
         learning_rate,
         weight_decay,
         tau,
+        stack_frames: Optional[int] = 1,
         **kwargs,
     ):
         self.logger = logger
@@ -65,6 +66,8 @@ class DQNAlgorithm(abc.ABC):
 
         self.gamma = gamma
         self.tau = tau
+
+        self.stack_frames = stack_frames
 
         self.batch_size = batch_size
 
@@ -148,15 +151,25 @@ class DQNAlgorithm(abc.ABC):
         episode_reward = 0
         steps_in_episode = 0
         start_time = time.time()
+        frames_deque = deque(
+            [np.zeros(state.shape) for _ in range(self.stack_frames)],
+            maxlen=self.stack_frames,
+        )
+        # Stack the initial state
+        for _ in range(self.stack_frames):
+            frames_deque.append(state)
+        stacked_state = np.concatenate(frames_deque, axis=0)
+        # This assumes the frames are concatenated along the channel dimension
         for step in range(self.steps_per_episode):
             self.logger.before_step(step, should_record_video=True)
-            action = self.exploit_action(state)
+            action = self.exploit_action(stacked_state)
             next_state, reward, done, truncated, info = self.env.step(action)
             episode_reward += reward
             steps_in_episode += 1
             if done:
                 break
-            state = next_state
+            frames_deque.append(next_state)
+            stacked_state = np.concatenate(frames_deque, axis=0)  # Update stacked_state
         time_took = time.time() - start_time
         self.logger.after_episode()
         return episode_reward, steps_in_episode, time_took
@@ -172,20 +185,30 @@ class DQNAlgorithm(abc.ABC):
         steps_in_episode = 0
         losses = []
         start_time = time.time()
-
+        frames_deque = deque(
+            [np.zeros(state.shape) for _ in range(self.stack_frames)],
+            maxlen=self.stack_frames,
+        )
+        # Stack the initial state
+        for _ in range(self.stack_frames):
+            frames_deque.append(state)
+        stacked_state = np.concatenate(frames_deque, axis=0)
+        # This assumes the frames are concatenated along the channel dimension
         for step in range(self.steps_per_episode):
             self.logger.before_step(step, should_record_video=False)
             if self.explorer.should_explore() or self.episode < self.warmup_episodes:
                 action = np.random.choice(self.action_dim)
             else:  # exploit
-                action = self.exploit_action(state)
+                action = self.exploit_action(stacked_state)
             next_state, reward, done, truncated, info = self.env.step(action)
+            frames_deque.append(next_state)
+            stacked_state = np.concatenate(frames_deque, axis=0)  # Update stacked_state
             episode_reward += reward
             steps_in_episode += 1
             self.total_steps += 1
 
             # add experience to replay buffer
-            self.add_experience(state, action, next_state, reward, done)
+            self.add_experience(state, action, stacked_state, reward, done)
 
             # update policy network
             if self.total_steps % self.train_frequency == 0:
@@ -198,7 +221,7 @@ class DQNAlgorithm(abc.ABC):
 
             if done:
                 break
-            state = next_state
+            # state = next_state
 
         end_time = time.time()
         if self.episode > self.warmup_episodes:
