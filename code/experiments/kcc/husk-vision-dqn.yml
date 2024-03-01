@@ -1,6 +1,6 @@
 seed: null
 env_path: null
-group: "kcc-husk-vision-dqn"
+group: "kcc-husk-vision-dqn-wsi"
 record_video: true
 device: null
 

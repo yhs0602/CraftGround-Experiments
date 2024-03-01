@@ -1,6 +1,6 @@
 seed: null
 env_path: null
-group: "kcc-husk-bimodal-dqn-final"
+group: "kcc-husk-bimodal-dqn-wsi"
 record_video: true
 device: null
 
