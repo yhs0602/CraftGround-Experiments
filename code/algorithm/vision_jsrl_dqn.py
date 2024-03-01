@@ -65,6 +65,6 @@ class VisionJSRLDQNAlgorithm(JSRLDQNAlgorithm):
             self.state_dim, self.action_dim, kernel_size, stride, hidden_dim
         ).to(device)
 
-        self.optimizer = optim.Adam(
+        self.optimizer = optim.AdamW(
             self.policy_net.parameters(), lr=learning_rate, weight_decay=weight_decay
         )

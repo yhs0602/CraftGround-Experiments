@@ -86,7 +86,7 @@ class BimodalJSRLDRQNAlgorithm(JSRLDRQNAlgorithm):
             hidden_dim,
             device,
         ).to(device)
-        self.optimizer = optim.Adam(
+        self.optimizer = optim.AdamW(
             self.policy_net.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
 

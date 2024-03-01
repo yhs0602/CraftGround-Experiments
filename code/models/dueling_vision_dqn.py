@@ -13,21 +13,21 @@ class DuelingVisionDQN(DuelingDQNBase):
         super(DuelingVisionDQN, self).__init__()
         self.feature = nn.Sequential(
             nn.Conv2d(state_dim[0], 16, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
         )
         conv_out_size = self.get_conv_output(state_dim)
         self.advantage = nn.Sequential(
             nn.Linear(conv_out_size, hidden_dim),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Linear(hidden_dim, action_dim),
         )
 
         self.value = nn.Sequential(
-            nn.Linear(conv_out_size, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1)
+            nn.Linear(conv_out_size, hidden_dim), nn.SiLU(), nn.Linear(hidden_dim, 1)
         )
 
     def get_conv_output(self, shape):

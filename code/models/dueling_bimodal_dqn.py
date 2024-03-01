@@ -14,33 +14,33 @@ class DuelingBiModalDQN(DuelingDQNBase):
     ):
         super(DuelingBiModalDQN, self).__init__()
         self.audio_feature = nn.Sequential(
-            nn.Linear(sound_dim[0], hidden_dim), nn.ReLU()
+            nn.Linear(sound_dim[0], hidden_dim), nn.SiLU()
         )
         self.conv = nn.Sequential(
             nn.Conv2d(state_dim[0], 16, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride),
-            nn.ReLU(),
+            nn.SiLU(),
         )
         conv_out_size = self.get_conv_output(state_dim)
         self.video_feature = nn.Sequential(
-            self.conv, nn.Flatten(), nn.Linear(conv_out_size, hidden_dim), nn.ReLU()
+            self.conv, nn.Flatten(), nn.Linear(conv_out_size, hidden_dim), nn.SiLU()
         )
         self.feature = nn.Sequential(
             nn.Linear(hidden_dim * 2, hidden_dim),
-            nn.ReLU(),
+            nn.SiLU(),
         )
 
         self.advantage = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Linear(hidden_dim, action_dim),
         )
 
         self.value = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1)
+            nn.Linear(hidden_dim, hidden_dim), nn.SiLU(), nn.Linear(hidden_dim, 1)
         )
 
     def get_conv_output(self, shape):

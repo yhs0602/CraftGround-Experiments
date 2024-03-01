@@ -83,7 +83,7 @@ class BimodalDQNAlgorithm(DQNAlgorithm):
         ).to(device)
         del self.replay_buffer
         self.replay_buffer = BiModalReplayBuffer(replay_buffer_size)
-        self.optimizer = optim.Adam(
+        self.optimizer = optim.AdamW(
             self.policy_net.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
 

@@ -63,6 +63,6 @@ class SoundDRQNAlgorithm(DRQNAlgorithm):
         self.target_net = DuelingSoundDRQN(
             self.state_dim, self.action_dim, hidden_dim, device
         ).to(device)
-        self.optimizer = optim.Adam(
+        self.optimizer = optim.AdamW(
             self.policy_net.parameters(), lr=learning_rate, weight_decay=weight_decay
         )

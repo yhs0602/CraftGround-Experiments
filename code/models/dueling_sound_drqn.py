@@ -10,7 +10,7 @@ class DuelingSoundDRQN(nn.Module):
         super(DuelingSoundDRQN, self).__init__()
         self.hidden_dim = hidden_dim
         self.device = device
-        self.feature = nn.Sequential(nn.Linear(state_dim[0], hidden_dim), nn.ReLU())
+        self.feature = nn.Sequential(nn.Linear(state_dim[0], hidden_dim), nn.SiLU())
         self.lstm = nn.LSTM(
             input_size=hidden_dim,
             hidden_size=hidden_dim,
@@ -20,12 +20,12 @@ class DuelingSoundDRQN(nn.Module):
 
         self.advantage = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
+            nn.SiLU(),
             nn.Linear(hidden_dim, action_dim),
         )
 
         self.value = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1)
+            nn.Linear(hidden_dim, hidden_dim), nn.SiLU(), nn.Linear(hidden_dim, 1)
         )
 
     def forward(self, x, batch_size, time_step, hidden_state, cell_state):
