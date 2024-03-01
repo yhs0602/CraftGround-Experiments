@@ -1,5 +1,6 @@
 from typing import Optional
 
+import numpy as np
 import torch
 from torch import optim
 
@@ -87,12 +88,13 @@ class BimodalDQNAlgorithm(DQNAlgorithm):
         )
 
     def add_experience(self, state, action, next_state, reward, done):
-        audio = state["sound"]
-        video = state["vision"]
-        next_audio = next_state["sound"]
-        next_video = next_state["vision"]
+        # Extract sound and vision arrays from state and next_state
+        audios = np.stack([s["sound"] for s in state])
+        videos = np.stack([s["vision"] for s in state])
+        next_audios = np.stack([s["sound"] for s in next_state])
+        next_videos = np.stack([s["vision"] for s in next_state])
         self.replay_buffer.add(
-            audio, video, action, next_audio, next_video, reward, done
+            audios, videos, action, next_audios, next_videos, reward, done
         )
 
     def exploit_action(self, state) -> int:

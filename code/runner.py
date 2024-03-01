@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 import yaml
+from craftground.wrappers.fast_reset import FastResetWrapper
 
 import algorithm
 import environments
@@ -55,7 +56,7 @@ class Runner:
             )
             inner_env = wrapper_instance
 
-        env = inner_env
+        env = FastResetWrapper(inner_env)
 
         self.data.update({"seed": self.seed})
         self.data.update({"sound_list": sound_list})

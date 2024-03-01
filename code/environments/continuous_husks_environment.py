@@ -72,6 +72,7 @@ class ContinuousHuskEnvironment(BaseEnvironment):
                     render_action=render_action,
                     render_distance=render_distance,
                     simulation_distance=simulation_distance,
+                    **kwargs,
                 )
                 super(RandomHuskWrapper, self).__init__(self.env)
 
