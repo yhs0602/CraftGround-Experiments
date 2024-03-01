@@ -1,6 +1,6 @@
 seed: null
 env_path: null
-group: "kcc-husk-vision-dqn"
+group: "kcc-husk-vision-stack-dqn"
 record_video: true
 device: null
 
@@ -8,19 +8,20 @@ env:
   name: 'ContinuousHuskEnvironment'
   params:
     hud: false
-    verbose: true
+    verbose: false
     port: 8000
     render_action: true
     size_x: 114
     size_y: 64
-    render_distance: 2
+    render_distance: 5
     simulation_distance: 5
     strong: true
     min_distance: 15
     max_distance: 30
     num_husks: 20
     continuous: true
-    biocular: true
+    is_biocular: false
+    use_terminate: true
 
 wrappers:
   - name: 'ActionWrapper'
@@ -70,5 +71,6 @@ algorithm:
     learning_rate: 0.00001
     weight_decay: 0.00001
     tau: 0.05
+    stack_size: 16
 
 

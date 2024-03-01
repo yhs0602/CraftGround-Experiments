@@ -1,6 +1,6 @@
 seed: null
 env_path: null
-group: "kcc-husk-bimodal-dqn-final"
+group: "kcc-husk-bimodal-stack-dqn-final"
 record_video: true
 device: null
 
@@ -13,13 +13,15 @@ env:
     render_action: true
     size_x: 114
     size_y: 64
-    render_distance: 2
+    render_distance: 5
     simulation_distance: 5
     strong: true
     min_distance: 15
     max_distance: 30
     num_husks: 10
     continuous: true
+    is_biocular: false
+    use_terminate: true
 
 wrappers:
   - name: 'ActionWrapper'
@@ -71,5 +73,6 @@ algorithm:
     learning_rate: 0.00001
     weight_decay: 0.00001
     tau: 0.05
+    stack_size: 16
 
 

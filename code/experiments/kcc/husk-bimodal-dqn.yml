@@ -13,13 +13,15 @@ env:
     render_action: true
     size_x: 114
     size_y: 64
-    render_distance: 2
+    render_distance: 5
     simulation_distance: 5
     strong: true
     min_distance: 15
     max_distance: 30
     num_husks: 10
     continuous: true
+    is_biocular: false
+    use_terminate: true
 
 wrappers:
   - name: 'ActionWrapper'
