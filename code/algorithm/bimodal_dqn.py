@@ -1,3 +1,5 @@
+import time
+from collections import deque
 from typing import Optional
 
 import numpy as np
@@ -87,6 +89,87 @@ class BimodalDQNAlgorithm(DQNAlgorithm):
             self.policy_net.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
 
+    def test_agent(self, episode):
+        self.logger.before_episode(self.env, should_record_video=True, episode=episode)
+        state, reset_info = self.env.reset(options={"fast_reset": True})
+        episode_reward = 0
+        steps_in_episode = 0
+        start_time = time.time()
+        frames_deque = deque(maxlen=self.stack_frames)
+        # Stack the initial state
+        for _ in range(self.stack_frames):
+            frames_deque.append(state)
+        # This assumes the frames are concatenated along the channel dimension
+        for step in range(self.steps_per_episode):
+            self.logger.before_step(step, should_record_video=True)
+            action = self.exploit_action(frames_deque)
+            next_state, reward, done, truncated, info = self.env.step(action)
+            episode_reward += reward
+            steps_in_episode += 1
+            if done:
+                break
+            frames_deque.append(next_state)
+        time_took = time.time() - start_time
+        self.logger.after_episode()
+        return episode_reward, steps_in_episode, time_took
+
+    def train_agent(self):
+        self.logger.before_episode(
+            self.env, should_record_video=False, episode=self.episode
+        )
+        state, info = self.env.reset(options={"fast_reset": True})
+        episode_reward = 0
+        steps_in_episode = 0
+        losses = []
+        start_time = time.time()
+        frames_deque = deque(maxlen=self.stack_frames)
+        next_frames_deque = deque(maxlen=self.stack_frames)
+        # Stack the initial state
+        for _ in range(self.stack_frames):
+            frames_deque.append(state)
+            next_frames_deque.append(state)
+        # This assumes the frames are concatenated along the channel dimension
+        for step in range(self.steps_per_episode):
+            self.logger.before_step(step, should_record_video=False)
+            if self.explorer.should_explore() or self.episode < self.warmup_episodes:
+                action = np.random.choice(self.action_dim)
+            else:  # exploit
+                action = self.exploit_action(frames_deque)
+            next_state, reward, done, truncated, info = self.env.step(action)
+            next_frames_deque.append(next_state)
+            episode_reward += reward
+            steps_in_episode += 1
+            self.total_steps += 1
+
+            # add experience to replay buffer
+            self.add_experience(frames_deque, action, next_frames_deque, reward, done)
+
+            # update policy network
+            if self.total_steps % self.train_frequency == 0:
+                loss = self.update_policy_net()
+                losses.append(loss)
+
+            # update target network
+            if self.total_steps % self.update_frequency == 0:
+                self.update_target_net()
+
+            if done:
+                break
+            # i.e. state = next_state
+            frames_deque.append(state)
+
+        end_time = time.time()
+        if self.episode > self.warmup_episodes:
+            self.explorer.after_episode()  # update epsilon
+        avg_loss = np.mean([loss for loss in losses if loss is not None])
+        return (
+            episode_reward,
+            steps_in_episode,
+            end_time - start_time,
+            avg_loss,
+            info,
+        )
+
     def add_experience(self, state, action, next_state, reward, done):
         # Extract sound and vision arrays from state and next_state
         audios = np.stack([s["sound"] for s in state])
@@ -98,10 +181,12 @@ class BimodalDQNAlgorithm(DQNAlgorithm):
         )
 
     def exploit_action(self, state) -> int:
-        audio_state = state["sound"]
-        video_state = state["vision"]
-        audio_state = torch.FloatTensor(audio_state).unsqueeze(0).to(self.device)
-        video_state = torch.FloatTensor(video_state).unsqueeze(0).to(self.device)
+        audio_state = np.stack([s["sound"] for s in state])
+        video_state = np.stack([s["vision"] for s in state])
+        # audio_state = state["sound"]
+        # video_state = state["vision"]
+        audio_state = torch.FloatTensor(audio_state).to(self.device)
+        video_state = torch.FloatTensor(video_state).to(self.device)
         self.policy_net.eval()
         with torch.no_grad():
             q_values = self.policy_net(audio_state, video_state).detach()
@@ -121,12 +206,12 @@ class BimodalDQNAlgorithm(DQNAlgorithm):
             reward,
             done,
         ) = self.replay_buffer.sample(self.batch_size)
-        audio = audio.to(self.device)
-        video = video.to(self.device)
+        audio = audio.to(self.device).squeeze(1)
+        video = video.to(self.device).squeeze(1)
         action = action.to(self.device)
         reward = reward.to(self.device).squeeze(1)
-        next_audio = next_audio.to(self.device)
-        next_video = next_video.to(self.device)
+        next_audio = next_audio.to(self.device).squeeze(1)
+        next_video = next_video.to(self.device).squeeze(1)
         done = done.to(self.device).squeeze(1)
 
         q_values = (

@@ -8,6 +8,15 @@ from torch.autograd import Variable
 from models.dueling_dqn_base import DuelingDQNBase
 
 
+class SqueezeLayer(nn.Module):
+    def __init__(self, dim):
+        super(SqueezeLayer, self).__init__()
+        self.dim = dim
+
+    def forward(self, x):
+        return x.squeeze(self.dim)
+
+
 class DuelingBiModalDQN(DuelingDQNBase):
     def __init__(
         self, state_dim, sound_dim, action_dim, kernel_size, stride, hidden_dim
@@ -26,7 +35,10 @@ class DuelingBiModalDQN(DuelingDQNBase):
         )
         conv_out_size = self.get_conv_output(state_dim)
         self.video_feature = nn.Sequential(
-            self.conv, nn.Flatten(), nn.Linear(conv_out_size, hidden_dim), nn.SiLU()
+            self.conv,
+            nn.Flatten(),
+            nn.Linear(conv_out_size, hidden_dim),
+            nn.SiLU(),
         )
         self.feature = nn.Sequential(
             nn.Linear(hidden_dim * 2, hidden_dim),
