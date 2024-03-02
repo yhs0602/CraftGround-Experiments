@@ -74,6 +74,8 @@ class Runner:
             env=env, **self.algorithm_params, logger=logger, device=self.device
         )
         algorithm_instance.run()
+        if hasattr(env, "terminate"):
+            env.terminate()
 
 
 if __name__ == "__main__":
