@@ -20,6 +20,8 @@ env:
     max_distance: 30
     num_husks: 10
     continuous: true
+    is_biocular: false
+    use_terminate: true
 
 wrappers:
   - name: 'ActionWrapper'
