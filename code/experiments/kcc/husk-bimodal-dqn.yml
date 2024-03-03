@@ -9,7 +9,7 @@ env:
   params:
     hud: false
     verbose: false
-    port: 8003
+    port: 8005
     render_action: true
     size_x: 114
     size_y: 64
